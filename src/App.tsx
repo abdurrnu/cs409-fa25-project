@@ -1,24 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
+import { AuthForm } from './AuthForm';
+import { Dashboard } from './Dashboard';
 
 function App() {
+  const [user, setUser] = useState<string | null>(null);
+
+  const handleLogin = (email: string) => {
+    // Extract NetID from email for display if needed, or just store email
+    setUser(email);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {user ? (
+        <Dashboard user={user} onLogout={handleLogout} />
+      ) : (
+        <AuthForm onLogin={handleLogin} />
+      )}
     </div>
   );
 }

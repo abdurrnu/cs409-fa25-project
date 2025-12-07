@@ -1,38 +1,137 @@
+/* Global App Container */
 .App {
+  min-height: 100vh;
+  background-image: url('./assets/cornfield.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* Semi-transparent overlay to ensure text readability */
+.App::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-overlay);
+  z-index: 0;
+}
+
+/* Ensure content sits above overlay */
+.App>* {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+/* Auth Container Styling */
+.auth-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 3rem 4rem;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  max-width: 450px;
+  width: 90%;
+  margin: 0 auto;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Auth Header */
+.auth-header {
+  margin-bottom: 2.5rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.auth-header h2 {
+  color: var(--illini-blue);
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  font-weight: 800;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+.auth-header p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--illini-blue);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  border-color: var(--illini-orange);
+  outline: none;
+}
+
+button[type="submit"] {
+  background-color: var(--illini-orange);
   color: white;
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  margin-top: 1rem;
 }
 
-.App-link {
-  color: #61dafb;
+button[type="submit"]:hover {
+  background-color: #d14022;
+  transform: translateY(-2px);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+button[type="submit"]:disabled {
+  background-color: #fabbb0;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.auth-switch {
+  margin-top: 2rem;
+  font-size: 1rem;
+  color: #666;
+}
+
+.auth-switch span {
+  color: var(--illini-blue);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.logo-container {
+  margin-bottom: 1.5rem;
+}
+
+.block-i-logo {
+  height: 80px;
+  width: auto;
 }

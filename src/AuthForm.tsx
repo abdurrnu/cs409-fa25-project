@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { api } from './api';
+import { api, User } from './api';
 
 interface AuthFormProps {
-    onLogin: (email: string) => void;
+    onLogin: (user: User) => void;
 }
 
 export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
@@ -22,15 +22,19 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
         setLoading(true);
 
         try {
-            // For now, sign up and login use the same API mock
-            const response = await api.login(email);
-            if (response.success) {
-                onLogin(email);
+            let user: User;
+            if (isLogin) {
+                // real login: needs email + password
+                user = await api.login(email, password);
             } else {
-                setError(response.error || 'Authentication failed');
+                // sign up / register
+                // location is optional for now; we can add a field later if needed
+                user = await api.register(email, password, null);
             }
-        } catch (err) {
-            setError('An unexpected error occurred');
+            onLogin(user);
+        } catch (err: any) {
+            // handleResponse throws an Error with message from backend
+            setError(err?.message || 'Authentication failed');
         } finally {
             setLoading(false);
         }
@@ -49,7 +53,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
             </div>
 
             <form onSubmit={handleSubmit}>
-                {error && <div className="error-message" style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
+                {error && (
+                    <div 
+                        className="error-message" 
+                        style={{ color: 'red', marginBottom: '10px' }}
+                    >
+                        {error}
+                    </div>
+                )}
                 <div className="form-group">
                     <label>Email</label>
                     <input
@@ -77,7 +88,10 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
             <div className="auth-switch">
                 <p>
                     {isLogin ? "Don't have an account?" : "Already have an account?"}
-                    <span onClick={() => setIsLogin(!isLogin)} style={{ cursor: 'pointer', color: 'blue', marginLeft: '5px' }}>
+                    <span 
+                        onClick={() => setIsLogin(!isLogin)} 
+                        style={{ cursor: 'pointer', color: 'blue', marginLeft: '5px' }}
+                    >
                         {isLogin ? ' Sign up' : ' Login'}
                     </span>
                 </p>

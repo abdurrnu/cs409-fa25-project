@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import './App.css';
 import { AuthForm } from './AuthForm';
 import { Dashboard } from './Dashboard';
+import { User } from './api';
 
 function App() {
-  const [user, setUser] = useState<string | null>(null);
+  // store the full logged-in user, not just their email
+  const [user, setUser] = useState<User | null>(null);
 
-  const handleLogin = (email: string) => {
-    // Extract NetID from email for display if needed, or just store email
-    setUser(email);
+  const handleLogin = (loggedInUser: User) => {
+    setUser(loggedInUser);
   };
 
   const handleLogout = () => {

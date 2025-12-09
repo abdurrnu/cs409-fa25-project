@@ -10,6 +10,7 @@ export interface Item {
     location: string;
     date: string; // ISO Date string
     contact_netid: string;
+    status?: string; // "pending" | "finished"
 }
 
 export const CATEGORIES: ItemCategory[] = [

@@ -46,7 +46,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                     type: item.type, // "Lost" | "Found"
                     date,
                     category: defaultCategory,
-                    contact_netid: `user${item.user_id}` // placeholder
+                    contact_netid: `user${item.user_id}`, // placeholder
+                    status: (item as any).status // from backend ("pending" | "finished")
                 };
             });
 
@@ -65,7 +66,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
         const matchesType = filterType === 'All' || item.type === filterType;
         const matchesCategory = filterCategory === 'All' || item.category === filterCategory;
-        return matchesSearch && matchesType && matchesCategory;
+
+        // Hide found items that have already been claimed (status !== "pending")
+        const isVisibleByStatus =
+        item.type === 'Found'
+            ? item.status !== 'finished'
+            : true; // Lost items always visible for now
+        
+
+        return matchesSearch && matchesType && matchesCategory && isVisibleByStatus;
     });
 
     const netid = user.email.split('@')[0];
@@ -166,6 +175,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                             <div className="item-contact">
                                 📧 {item.contact_netid}@illinois.edu
                             </div>
+
+                            {item.type === 'Found' && (
+                                <button
+                                    className="claim-btn"
+                                    onClick={async () => {
+                                        try {
+                                            await api.claimItem(Number(item.id), user.id, "Claimed via dashboard");
+                                            alert('Claim submitted successfully!');
+                                            await loadItems();  // refresh list from backend
+                                        } catch (err: any) {
+                                            alert(err?.message || 'Failed to claim item');
+                                        }
+                                    }}
+                                >
+                                    Claim Item
+                                </button>
+                            )}
                         </div>
                     ))
                 )}

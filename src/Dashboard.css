@@ -48,6 +48,21 @@
     gap: 1.5rem;
 }
 
+.claim-btn {
+    margin-top:8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: none;
+    background-color: #13294b;
+    color: white;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.claim-btn:hover {
+    background-color: #1d3c73;
+}
+
 .post-btn {
     background-color: var(--illini-orange);
     color: white;

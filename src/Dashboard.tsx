@@ -69,7 +69,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
         // Hide found items that have already been claimed (status !== "pending")
         const isVisibleByStatus =
-        item.type === 'Found'
+        item.type === 'Lost'
             ? item.status !== 'finished'
             : true; // Lost items always visible for now
         
@@ -176,7 +176,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                                 📧 {item.contact_netid}@illinois.edu
                             </div>
 
-                            {item.type === 'Found' && (
+                            {item.type === 'Lost' && (
                                 <button
                                     className="claim-btn"
                                     onClick={async () => {

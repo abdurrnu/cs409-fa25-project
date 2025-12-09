@@ -12,7 +12,9 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     email = db.Column(db.String(128), unique = True, nullable = False)
     password_hash = db.Column(db.String(128), nullable = False)
-    location = db.Column(db.String(128), unique = False, nullable = False)
+
+    # make location nullable since we allow None in __init__ and /register
+    location = db.Column(db.String(128), unique = False, nullable = True)
     created_at = db.Column(db.DateTime, default = datetime.utcnow)
 
 
@@ -74,10 +76,4 @@ class Claim(db.Model):
     message = db.Column(db.Text)
     status = db.Column(db.String(20), default='pending')  # can be pending or finished
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-
-     
-
-
-
-
+    

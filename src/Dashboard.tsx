@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { api } from './api';
+import { api, User } from './api';
 import { Item, ItemCategory, CATEGORIES } from './types';
 import { PostItemModal } from './PostItemModal';
 import './Dashboard.css';
 
 interface DashboardProps {
-    user: string;
+    user: User;
     onLogout: () => void;
 }
 
@@ -24,8 +24,34 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     const loadItems = async () => {
         setLoading(true);
         try {
-            const data = await api.getItems();
-            setItems(data);
+            const data = await api.getAllItems(); // AnyItem[]
+
+            const defaultCategory: ItemCategory = CATEGORIES[0];
+
+            const mapped: Item[] = data.map((item) => {
+                const rawDate = 
+                    (item as any).date_lost ??
+                    (item as any).date_found ??
+                    item.created_at;
+                
+                const date = typeof rawDate === 'string'
+                    ? rawDate
+                    : new Date(rawDate).toISOString();
+                
+                return {
+                    id: String(item.id),    // Item.id is a string in UI model
+                    title: item.title,
+                    description: item.description,
+                    location: item.location,
+                    type: item.type, // "Lost" | "Found"
+                    date,
+                    category: defaultCategory,
+                    contact_netid: `user${item.user_id}`, // placeholder
+                    status: (item as any).status // from backend ("pending" | "finished")
+                };
+            });
+
+            setItems(mapped);
         } catch (error) {
             console.error('Failed to load items', error);
         } finally {
@@ -34,21 +60,37 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
     };
 
     const filteredItems = items.filter(item => {
-        const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        const matchesSearch = 
+            item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             item.location.toLowerCase().includes(searchTerm.toLowerCase());
+
         const matchesType = filterType === 'All' || item.type === filterType;
         const matchesCategory = filterCategory === 'All' || item.category === filterCategory;
-        return matchesSearch && matchesType && matchesCategory;
+
+        // Hide found items that have already been claimed (status !== "pending")
+        const isVisibleByStatus =
+        item.type === 'Lost'
+            ? item.status !== 'finished'
+            : true; // Lost items always visible for now
+        
+
+        return matchesSearch && matchesType && matchesCategory && isVisibleByStatus;
     });
+
+    const netid = user.email.split('@')[0];
 
     return (
         <div className="dashboard-container">
             <header className="dashboard-header">
                 <div className="header-left">
-                    <img src={require('./assets/Illinois_Block_I.png')} alt="UIUC Logo" style={{ height: '50px', marginRight: '15px' }} />
+                    <img 
+                        src={require('./assets/Illinois_Block_I.png')} 
+                        alt="UIUC Logo" 
+                        style={{ height: '50px', marginRight: '15px' }} 
+                    />
                     <div>
-                        <h1>Find & Seek</h1>
-                        <span className="user-welcome">Hello, {user}</span>
+                        <h1>Find &amp; Seek</h1>
+                        <span className="user-welcome">Hello, {netid}</span>
                     </div>
                 </div>
                 <div className="header-right">
@@ -76,25 +118,34 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                         <button
                             className={filterType === 'All' ? 'active' : ''}
                             onClick={() => setFilterType('All')}
-                        >All</button>
+                        >
+                            All
+                        </button>
                         <button
                             className={filterType === 'Lost' ? 'active' : ''}
                             onClick={() => setFilterType('Lost')}
-                        >Lost</button>
+                        >
+                            Lost
+                        </button>
                         <button
                             className={filterType === 'Found' ? 'active' : ''}
                             onClick={() => setFilterType('Found')}
-                        >Found</button>
+                        >
+                            Found
+                        </button>
                     </div>
 
                     <select
                         value={filterCategory}
-                        onChange={(e) => setFilterCategory(e.target.value as ItemCategory | 'All')}
+                        onChange={(e) => 
+                            setFilterCategory(e.target.value as ItemCategory | 'All')}
                         className="category-select"
                     >
                         <option value="All">All Categories</option>
                         {CATEGORIES.map(cat => (
-                            <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                            <option key={cat} value={cat}>
+                                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                            </option>
                         ))}
                     </select>
                 </div>
@@ -107,18 +158,40 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                     <p className="no-items">No items found matching your criteria.</p>
                 ) : (
                     filteredItems.map(item => (
-                        <div key={item.id} className={`item-card ${item.type.toLowerCase()}`}>
+                        <div 
+                            key={item.id} 
+                            className={`item-card ${item.type.toLowerCase()}`}
+                        >
                             <div className="item-badge">{item.type}</div>
                             <h3>{item.title}</h3>
                             <p className="item-desc">{item.description}</p>
                             <div className="item-details">
                                 <span>📍 {item.location}</span>
-                                <span>📅 {new Date(item.date).toLocaleDateString()}</span>
+                                <span>
+                                    📅 {new Date(item.date).toLocaleDateString()}
+                                </span>
                                 <span>🏷️ {item.category}</span>
                             </div>
                             <div className="item-contact">
                                 📧 {item.contact_netid}@illinois.edu
                             </div>
+
+                            {item.type === 'Lost' && (
+                                <button
+                                    className="claim-btn"
+                                    onClick={async () => {
+                                        try {
+                                            await api.claimItem(Number(item.id), user.id, "Claimed via dashboard");
+                                            alert('Claim submitted successfully!');
+                                            await loadItems();  // refresh list from backend
+                                        } catch (err: any) {
+                                            alert(err?.message || 'Failed to claim item');
+                                        }
+                                    }}
+                                >
+                                    Claim Item
+                                </button>
+                            )}
                         </div>
                     ))
                 )}

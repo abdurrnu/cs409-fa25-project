@@ -98,6 +98,8 @@ export type PostLostItemInput = {
     user_id: number;
     location: string;
     date_lost: string; // "YYYY-MM-DD"
+    category: string;
+    contact_email: string;
 }
 
 export async function postLostItem(input: PostLostItemInput): Promise<LostItem> {
@@ -118,6 +120,8 @@ export type PostFoundItemInput = {
     user_id: number;
     location: string;
     date_found: string; // "YYYY-MM-DD"
+    category: string;
+    contact_email: string;
 }
 
 export async function postFoundItem(input: PostFoundItemInput): Promise<FoundItem> {

@@ -2,10 +2,14 @@ from flask import Flask, request, jsonify
 from datetime import date
 from user import db, User, LostItems, FoundItems, Claim
 from werkzeug.security import check_password_hash
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lostfound.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# enable CORs so the frontend can call this API
+CORS(app)
 
 db.init_app(app)
 with app.app_context():
@@ -85,12 +89,17 @@ def report_lost():
     except Exception:
         return jsonify({"message": "Invalid date_lost format. Use YYYY-MM-DD."}), 400
     
+    category = data.get("category")
+    contact_email = data.get("contact_email")
+    
     item = LostItems(
         title=data["title"],
         description=data["description"],
         user_id=data["user_id"],
         location=data["location"],
         date_lost=date_lost,
+        category=category,
+        contact_email=contact_email,
     )
     db.session.add(item)
     db.session.commit()
@@ -108,12 +117,17 @@ def report_found():
     except Exception:
         return jsonify({"message": "Invalid date_found format. Use YYYY-MM-DD."}), 400
     
+    category = data.get("category")
+    contact_email = data.get("contact_email")
+    
     item = FoundItems(
         title=data["title"],
         description=data["description"],
         user_id=data["user_id"],
         location=data["location"],
         date_found=date_found,
+        category=category,
+        contact_email=contact_email,
     )
     db.session.add(item)
     db.session.commit()
@@ -158,7 +172,7 @@ def claim_item(item_id):
     if not claimant_id:
         return jsonify({"error": "claimant_id is required"}), 400
     
-    item = FoundItems.query.get_or_404(item_id)
+    item = LostItems.query.get_or_404(item_id)
 
     # helps prevent double-claiming
     if item.status != "pending":

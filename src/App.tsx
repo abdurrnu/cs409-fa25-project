@@ -5,15 +5,25 @@ import { Dashboard } from './Dashboard';
 import { User } from './api';
 
 function App() {
-  // store the full logged-in user, not just their email
-  const [user, setUser] = useState<User | null>(null);
+  // Initialize from localStorage on first render
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const stored = localStorage.getItem('user');
+      return stored ? (JSON.parse(stored) as User) : null;
+    } catch {
+      return null;
+    }
+  });
 
-  const handleLogin = (loggedInUser: User) => {
-    setUser(loggedInUser);
+
+  const handleLogin = (user: User) => {
+    setUser(user);
+    localStorage.setItem('user', JSON.stringify(user));
   };
 
   const handleLogout = () => {
     setUser(null);
+    localStorage.removeItem('user');
   };
 
   return (

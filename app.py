@@ -2,10 +2,14 @@ from flask import Flask, request, jsonify
 from datetime import date
 from user import db, User, LostItems, FoundItems, Claim
 from werkzeug.security import check_password_hash
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lostfound.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# enable CORs so the frontend can call this API
+CORS(app)
 
 db.init_app(app)
 with app.app_context():

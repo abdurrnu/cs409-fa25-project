@@ -38,7 +38,7 @@ type ApiItemResponse = {
     item: BaseItem & { date_lost?: string; date_found?: string };
 };
 
-const API_BASE = "";
+const API_BASE = "https://cs409-fa25-project-backend.onrender.com";
 // w/ CRA proxy in package.josn, keep empty and just use relative URLs
 // IF remove proxy, change to "http://127.0.0.1:5000".
 

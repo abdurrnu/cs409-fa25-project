@@ -35,6 +35,10 @@ class Item(db.Model):
     # date_lost = db.Column(db.Date, nullable = False)
     status = db.Column(db.String(128), default = "pending") # can be pending or finished
     created_at = db.Column(db.DateTime, default = datetime.utcnow)
+
+    # NEW
+    category = db.Column(db.String(64), nullable=True) # New field for item category
+    contact_email = db.Column(db.String(128), nullable=True) # New field for contact email
     #automatrically gives me an __init__ constructor. Only need to do __init__ if I want a custom one like for User
     def to_dict(self):
         data = {}
@@ -66,12 +70,14 @@ class LostItems(Item):
             'date_lost': self.date_lost.isoformat() if self.date_lost else None,
             'status': self.status,
             'created_at': self.created_at.isoformat(),
-            'user_id': self.user_id
+            'user_id': self.user_id,
+            'category': self.category,
+            'contact_email': self.contact_email,
         }
     
 class Claim(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    item_id = db.Column(db.Integer, db.ForeignKey('founditems.id'))
+    item_id = db.Column(db.Integer, db.ForeignKey('lostitems.id'))
     claimant_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     message = db.Column(db.Text)
     status = db.Column(db.String(20), default='pending')  # can be pending or finished

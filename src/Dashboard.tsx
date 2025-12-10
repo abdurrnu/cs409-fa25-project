@@ -37,6 +37,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 const date = typeof rawDate === 'string'
                     ? rawDate
                     : new Date(rawDate).toISOString();
+
+                const backendCategory = (item as any).category as ItemCategory | undefined;
+                const backendContactEmail = (item as any).contact_email as string | undefined;
                 
                 return {
                     id: String(item.id),    // Item.id is a string in UI model
@@ -45,8 +48,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                     location: item.location,
                     type: item.type, // "Lost" | "Found"
                     date,
-                    category: defaultCategory,
-                    contact_netid: `user${item.user_id}`, // placeholder
+                    category: backendCategory ?? defaultCategory,
+                    contact_netid: backendContactEmail
+                        ? backendContactEmail.split('@')[0]
+                        : `user${item.user_id}`, // fallback if no email
                     status: (item as any).status // from backend ("pending" | "finished")
                 };
             });
@@ -67,11 +72,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         const matchesType = filterType === 'All' || item.type === filterType;
         const matchesCategory = filterCategory === 'All' || item.category === filterCategory;
 
-        // Hide found items that have already been claimed (status !== "pending")
+        // LOST items: only show while pending
+    // FOUND items: always shown (or you can later hide finished too)
         const isVisibleByStatus =
         item.type === 'Lost'
-            ? item.status !== 'finished'
-            : true; // Lost items always visible for now
+            ? item.status === 'pending'
+            : true; // Found items always visible for now
         
 
         return matchesSearch && matchesType && matchesCategory && isVisibleByStatus;
@@ -166,17 +172,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                             <h3>{item.title}</h3>
                             <p className="item-desc">{item.description}</p>
                             <div className="item-details">
-                                <span>📍 {item.location}</span>
+                                <span>
+                                    📍 {item.location}
+                                </span>
                                 <span>
                                     📅 {new Date(item.date).toLocaleDateString()}
                                 </span>
-                                <span>🏷️ {item.category}</span>
+                                <span>
+                                    🏷️ {item.category}
+                                </span>
                             </div>
                             <div className="item-contact">
                                 📧 {item.contact_netid}@illinois.edu
                             </div>
 
-                            {item.type === 'Lost' && (
+                            {item.type === 'Lost' && item.status === 'pending' && (
                                 <button
                                     className="claim-btn"
                                     onClick={async () => {

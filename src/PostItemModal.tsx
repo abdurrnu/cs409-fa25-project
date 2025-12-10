@@ -39,6 +39,8 @@ export const PostItemModal: React.FC<PostItemModalProps> = ({
                     location,
                     date_lost: date,    // "YYYY-MM-DD"
                     user_id: user.id,
+                    category,
+                    contact_email: user.email,
                 });
             } else {
                 await api.postFoundItem({
@@ -47,6 +49,8 @@ export const PostItemModal: React.FC<PostItemModalProps> = ({
                     location,
                     date_found: date,   // "YYYY-MM-DD"
                     user_id: user.id,
+                    category,
+                    contact_email: user.email,
                 });
             }
 
